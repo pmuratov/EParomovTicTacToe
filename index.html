@@ -66,62 +66,83 @@
           setWinnerSequence(winner);
         };
 
+        const handleResetClick = () => {
+          setCells(Array.from({ length: 9 }, () => null));
+          setCurrentStep(SYMBOL_X);
+          setWinnerSequence(undefined);
+        };
+
+        const winnerSymbol = winnerSequence
+          ? cells[winnerSequence[0]]
+          : undefined;
+        const isDraw =
+          !winnerSequence && cells.filter((value) => value).length === 9;
+
+        return (
+          <div className="game">
+            <GameInfo
+              isDraw={isDraw}
+              winnerSymbol={winnerSymbol}
+              currentStep={currentStep}
+            />
+            <div className="game-field">
+              {cells.map((symbol, index) => (
+                <GameCell
+                  key={index}
+                  symbol={symbol}
+                  isWinner={winnerSequence?.includes(index)}
+                  onClick={() => handleCellClick(index)}
+                />
+              ))}
+            </div>
+            <button className="reset" onClick={handleResetClick}>
+              Сбросить
+            </button>
+          </div>
+        );
+      }
+
+      function GameInfo({ isDraw, winnerSymbol, currentStep }) {
+        if (isDraw) {
+          return <div className="game-info">Ничья</div>;
+        }
+
+        if (winnerSymbol) {
+          return (
+            <div className="game-info">
+              Победитель: <GameSymbol symbol={winnerSymbol} />
+            </div>
+          );
+        }
+
+        return (
+          <div className="game-info">
+            Ход: <GameSymbol symbol={currentStep} />
+          </div>
+        );
+      }
+
+      function GameCell({ isWinner, onClick, symbol }) {
+        return (
+          <button
+            className={`cell ${isWinner ? "cell--win" : ""}`}
+            onClick={onClick}
+          >
+            {symbol ? <GameSymbol symbol={symbol} /> : null}
+          </button>
+        );
+      }
+
+      function GameSymbol({ symbol }) {
         const getSymbolClassName = (symbol) => {
           if (symbol === SYMBOL_O) return "symbol--o";
           if (symbol === SYMBOL_X) return "symbol--x";
           return "";
         };
-
-        const renderSymbol = (symbol) => (
+        return (
           <span className={`symbol ${getSymbolClassName(symbol)}`}>
             {symbol}
           </span>
-        );
-
-        const clearField = () => {
-          setCells([null, null, null, null, null, null, null, null, null]);
-          setWinnerSequence();
-          setCurrentStep(SYMBOL_O);
-        };
-        const winnerSymbol = winnerSequence
-          ? cells[winnerSequence[0]]
-          : undefined;
-
-        const checkDraw = (arr) => {
-          return arr.every((elem) => elem !== null);
-        };
-
-        return (
-          <>
-            <div className="game">
-              <div className="game-info">
-                {(() => {
-                  if (winnerSequence) {
-                    return <>Победитель: {renderSymbol(winnerSymbol)}</>;
-                  } else if (checkDraw(cells)) {
-                    return "Ничья";
-                  } else {
-                    return <>Ход: {renderSymbol(currentStep)}</>;
-                  }
-                })()}
-              </div>
-              <div className="game-field">
-                {cells.map((symbol, index) => {
-                  const isWinner = winnerSequence?.includes(index);
-                  return (
-                    <button
-                      key={index}
-                      className={`cell ${isWinner ? "cell--win" : ""}`}
-                      onClick={() => handleCellClick(index)}
-                    >
-                      {symbol ? renderSymbol(symbol) : null}
-                    </button>
-                  );
-                })}
-              </div>
-              <button onClick={clearField}>Сбросить</button>
-            </div>
-          </>
         );
       }
 
@@ -152,7 +173,6 @@
         grid-template-columns: repeat(3, 30px);
         grid-template-rows: repeat(3, 30px);
         padding: 1px 0 0 1px;
-        margin-bottom: 15px;
       }
 
       .cell {
@@ -179,6 +199,15 @@
 
       .symbol--o {
         color: green;
+      }
+
+      .reset {
+        cursor: pointer;
+        margin-top: 10px;
+        background-color: transparent;
+        border: 1px solid gray;
+        padding: 4px 12px;
+        border-radius: 4px;
       }
     </style>
   </body>
